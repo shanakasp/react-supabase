@@ -1,15 +1,18 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import supabase from "../config/supaBaseClient";
 
 const Create = () => {
   const [title, setTitle] = useState("");
-  const [method, setMethod] = useState("");
+  const [methid, setMethid] = useState("");
   const [rating, setRating] = useState("");
   const [formError, setformError] = useState("");
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!title || !method || !rating) {
+    if (!title || !methid || !rating) {
       setformError("Please fill in all fields");
       return;
     }
@@ -18,11 +21,26 @@ const Create = () => {
 
     const formData = {
       title,
-      method,
+      methid,
       rating,
     };
 
     console.log("form Submitted: ", formData);
+
+    const { data, error } = await supabase
+      .from("helloworld")
+      .insert([{ title, methid, rating }]);
+
+    if (error) {
+      console.log("Error: ", error);
+      setformError(error);
+    }
+
+    if (data) {
+      console.log("Data: ", data);
+      setformError(null);
+      navigate("/");
+    }
   };
 
   return (
@@ -43,8 +61,8 @@ const Create = () => {
           <span>Method:</span>
           <input
             type="text"
-            value={method}
-            onChange={(e) => setMethod(e.target.value)}
+            value={methid}
+            onChange={(e) => setMethid(e.target.value)}
             required
           />
         </label>
@@ -52,7 +70,7 @@ const Create = () => {
         <label>
           <span>Rating:</span>
           <input
-            type="text"
+            type="number"
             value={rating}
             onChange={(e) => setRating(e.target.value)}
             required
