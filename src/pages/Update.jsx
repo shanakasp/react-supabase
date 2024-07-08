@@ -8,6 +8,29 @@ const Update = () => {
   const [title, setTitle] = useState("");
   const [methid, setMethid] = useState("");
   const [rating, setRating] = useState("");
+  const [error, seterror] = useState(null);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!title || !methid || !rating) {
+      seterror("Please fill all the fields");
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from("helloworld")
+      .update({ title, methid, rating })
+      .eq("id", id);
+
+    if (error) {
+      seterror(error);
+      console.log(error);
+    }
+    if (data) {
+      seterror(null);
+      navigate("/", { replace: true });
+    }
+  };
 
   useEffect(() => {
     fetchSmoothie();
@@ -22,7 +45,7 @@ const Update = () => {
 
     if (error) {
       console.log(error);
-      navigate("/", { replace: true });
+      navigate("/");
     }
     if (data) {
       setTitle(data.title);
@@ -35,7 +58,7 @@ const Update = () => {
   return (
     <div className="page update">
       <h2>Update - {id}</h2>
-      <form>
+      <form onSubmit={handleSubmit}>
         <label>
           <span>Title:</span>
           <input
@@ -67,7 +90,7 @@ const Update = () => {
         </label>
 
         <button type="submit">Update</button>
-        {/* {formError && <p className="error">{formError}</p>} */}
+        {error && <p className="error">{error}</p>}
       </form>
     </div>
   );
